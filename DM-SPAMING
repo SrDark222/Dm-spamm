@@ -1,0 +1,73 @@
+import discord
+from discord.ext import commands
+import asyncio
+import os
+
+# Clear function for Termux
+def clear():
+    os.system('clear' if os.name == 'posix' else 'cls')
+
+# Collect bot token
+clear()
+TOKEN = input("Digite o token do seu bot: ")
+clear()
+
+# Initialize bot
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Function to send DM to all members in a server
+async def send_dm_all_members(server_id, message):
+    server = bot.get_guild(int(server_id))
+    if server:
+        clear()
+        print("BOT ENVIANDO...")
+        clear()
+        members = server.members
+        for member in members:
+            try:
+                await member.send(message)
+                print(f"Mensagem enviada para: {member.name}")
+            except Exception as e:
+                print(f"Falha ao enviar mensagem para {member.name}: {e}")
+    else:
+        print(f"Servidor com ID {server_id} não encontrado.")
+
+# Function to send DM to all members in all servers
+async def send_dm_all_servers(message):
+    clear()
+    print("BOT ENVIANDO...")
+    clear()
+    for server in bot.guilds:
+        members = server.members
+        for member in members:
+            try:
+                await member.send(message)
+                print(f"Mensagem enviada para: {member.name}")
+            except Exception as e:
+                print(f"Falha ao enviar mensagem para {member.name}: {e}")
+
+@bot.event
+async def on_ready():
+    clear()
+    print("Selecione a opção:")
+    print("1 - Enviar mensagem para um servidor específico")
+    print("2 - Enviar mensagem para todos os servidores")
+    choice = input("Escolha: ")
+
+    if choice == '1':
+        server_id = input("Digite o ID do servidor: ")
+        message = input("Digite a mensagem para enviar: ")
+        await send_dm_all_members(server_id, message)
+    elif choice == '2':
+        message = input("Digite a mensagem para enviar: ")
+        await send_dm_all_servers(message)
+    else:
+        print("Opção inválida. Saindo...")
+        await bot.close()
+
+    print("Mensagens enviadas com sucesso!")
+
+# Run the bot
+bot.run(TOKEN)
